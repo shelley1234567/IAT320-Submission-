@@ -1,9 +1,8 @@
-// Pin D7 has an LED connected on FLORA.
-// give it a name:
+
 int led_blue = 12;
 int led_white = 9;
 
-// the setup routine runs once when you press reset:
+
 void setup() {                
   // initialize the digital pin as an output.
   pinMode(led_white, OUTPUT);  
