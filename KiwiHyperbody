@@ -1,0 +1,107 @@
+#include <CapacitiveSensor.h>
+#include "Adafruit_FloraPixel.h"
+//simple led
+
+int ledPin = 2;
+//strip
+
+#include <Adafruit_NeoPixel.h>
+#ifdef __AVR__
+ #include <avr/power.h> // Required for 16 MHz Adafruit Trinket
+#endif
+
+#define LED_PIN    6
+#define LED_PIN2    5
+#define LED_COUNT 30
+
+// Declare our NeoPixel strip object:
+Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip2(LED_COUNT, LED_PIN2, NEO_GRB + NEO_KHZ800);
+// Argument 1 = Number of pixels in NeoPixel strip
+// Argument 2 = Arduino pin number (most are valid)
+// Argument 3 = Pixel type flags, add together as needed:
+//   NEO_KHZ800  800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
+//   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
+//   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
+//   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
+//   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
+
+
+//capactivesensor
+
+CapacitiveSensor   cs_9_10 = CapacitiveSensor(9,10);        // 10M resistor between pins 4 & 2, pin 2 is sensor pin, add a wire and or foil if desired
+
+void setup()                    
+{
+  //simple led
+  pinMode(ledPin, OUTPUT);
+  
+   cs_9_10.set_CS_AutocaL_Millis(0xFFFFFFFF);     // turn off autocalibrate on channel 1 - just as an example
+   Serial.begin(9600);
+//    strip.begin();
+//    strip.show();
+
+#if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
+  clock_prescale_set(clock_div_1);
+#endif
+  // END of Trinket-specific code.
+
+  strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
+  strip.show();            // Turn OFF all pixels ASAP
+  strip.setBrightness(50); // Set BRIGHTNESS to about 1/5 (max = 255)
+
+  strip2.begin();           
+  strip2.show();            
+  strip2.setBrightness(50);
+
+}
+
+void colorWipe(uint32_t color, int wait) {
+  for(int i=0; i<strip.numPixels(); i++) { // For each pixel in strip...
+    strip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
+    strip.show();                          //  Update strip to match
+    delay(wait);                           //  Pause for a moment
+  }
+}
+
+void colorWipe2(uint32_t color, int wait) {
+  for(int i=0; i<strip.numPixels(); i++) { // For each pixel in strip...
+    strip2.setPixelColor(i, color);         //  Set pixel's color (in RAM)
+    strip2.show();                          //  Update strip to match
+    delay(wait);                           //  Pause for a moment
+  }
+}
+
+void loop()                    
+{
+    long start = millis();
+    long total1 =  cs_9_10.capacitiveSensor(30);
+    //long total2 =  cs_9_2.capacitiveSensor(30);
+    //long total3 =  cs_4_8.capacitiveSensor(30);
+
+    Serial.print(millis() - start);        // check on performance in milliseconds
+    Serial.print("\t");                    // tab character for debug windown spacing
+
+    Serial.println(total1);                  // print sensor output 1
+    Serial.print("\t");
+
+if (total1 > 50){
+  digitalWrite(ledPin, HIGH);
+  digitalWrite(7, HIGH);
+  
+  colorWipe(strip.Color(255,   32,   0), 20);
+  
+  colorWipe2(strip2.Color(255,   32,   0), 20);
+  
+}
+
+if (total1 < 50){
+  
+  digitalWrite(ledPin, LOW);
+
+  colorWipe(strip.Color(  0, 0,   0), 20);
+  
+  colorWipe2(strip2.Color(  0, 0,   0), 20);
+}
+
+}
